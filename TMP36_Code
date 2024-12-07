@@ -1,0 +1,97 @@
+// Temperatures in Celsius & Fahrenheit via TMP36 sensor Display on Oled
+//======================================================
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+//===================================================================
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET     4
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+int sensorPin = A0;
+int ledPinA = 2;
+int ledPinB = 3;
+int ledPinC = 4;
+int ledPinD = 5;
+//===================================================================
+
+void setup()
+{
+  pinMode (A0,INPUT);
+  //set led pins as output
+  pinMode(ledPinA,OUTPUT);
+pinMode(ledPinB,OUTPUT);
+pinMode(ledPinC,OUTPUT);
+pinMode(ledPinD,OUTPUT);
+//initialize serial communication
+  Serial.begin(9600);
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) 
+  {
+    Serial.println(F("SSD1306 allocation failed"));
+    for (;;); // Don't proceed, loop forever
+  }//using internal 1.1voltage as reference voltage
+ analogReference(INTERNAL);
+}
+//===================================================================
+void loop()
+{
+int sensorValue = analogRead (A0);
+
+float mV= (1.1/1023.0)*1000*sensorValue;
+
+Serial.print(mV);
+Serial.println ("mV");
+float degC = (mV-500)/10;
+float degF = (degC*9/5) + 32;
+
+Serial.print(degC);
+Serial.println ("degC");
+Serial.print(degF);
+Serial.println ("degF");
+//choose any values of mV above from 755 till 800 mV or you can also use different range of temperature temperature values
+if ( mV <= 755)
+{
+  digitalWrite (ledPinA,HIGH);
+} 
+else {
+  digitalWrite(ledPinA,LOW);
+}
+if (mV > 755 && mV < 763)
+{
+  digitalWrite (ledPinB,HIGH);
+}
+else {
+  digitalWrite(ledPinB,LOW);
+}
+if (mV > 763 && mV < 785)
+{
+  digitalWrite (ledPinC,HIGH);
+}else {
+  digitalWrite(ledPinC,LOW);
+}
+if (mV > 785)
+{
+  digitalWrite (ledPinD,HIGH);
+}
+else {
+  digitalWrite(ledPinD,LOW);
+}
+// to clear any previous data on display
+  display.clearDisplay();
+  display.setTextColor(WHITE);
+  display.setTextSize(2);
+  display.setCursor(1, 1);
+  display.print("TMP36  ");
+  display.setTextSize(1);
+  display.print("SENSOR");
+  display.setTextSize(2);
+  display.print("\n-------:)");
+  display.setCursor(1, 30);
+  display.print(degC); display.print(" C");
+  display.setCursor(1, 50);
+  display.print(degF); display.print(" F");
+  display.display();
+  delay(2000);  
+  //total = 0; 
+}
